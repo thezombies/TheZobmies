@@ -1,0 +1,78 @@
+#셋팅
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+import requests
+
+#크롬웹드라이버 다운로드 위치 지정
+driver = webdriver.Chrome(#'/Users/THE_ZOMBIES/Downloads/chromedriver')
+#driver = webdriver.PhantomJS('/Users/THE_ZOMBIES/Downloads/phantomjs-2.1.1-macosx/bin/phantomjs')
+
+driver.implicitly_wait(3)
+driver.get('https://www.naver.com')
+
+driver.get('https://nid.naver.com/nidlogin.login')
+
+#네이버 로그인
+driver.find_element_by_name('id').send_keys(#'네이버아이디')
+driver.find_element_by_name('pw').send_keys(#'비밀번호')
+
+driver.find_element_by_xpath('//*[@id="frmNIDLogin"]/fieldset/input').click()
+
+#네이버강아지카페
+#소형견_스피츠 게시판
+#회원가입 필요 #본문 보려면 등업필요ㅠㅠ
+
+driver.get('http://cafe.naver.com/ArticleList.nhn?search.clubid=10258021&search.menuid=197&search.boardtype=L')
+
+iframe = driver.find_element_by_name('cafe_main')
+driver.switch_to_frame(iframe)
+
+webpage_source = driver.page_source
+
+soup = BeautifulSoup(webpage_source, 'html.parser')
+posts = soup.find_all('span', class_='aaa')
+
+board_url = '''http://cafe.naver.com/ArticleList.nhn?search.clubid=10258021&search.menuid=197&search.boardtype=L&search.questionTab=A&search.totalCount=151&search.page=
+'''
+letter ='' 
+link = ''
+
+for i in range(1,10):
+    url = board_url + str(i)
+    driver.get(url)
+    
+    iframe = driver.find_element_by_name('cafe_main')
+    driver.switch_to_frame(iframe)
+    webpage_source = driver.page_source
+    soup = BeautifulSoup(webpage_source, 'html.parser')
+    posts = soup.find_all('span', class_='aaa')
+    
+    for post in posts:
+        title = post.find('a')
+        if #'찾고싶은단어' in title.get_text():
+            print(title.get_text())
+            
+            print('http://cafe.naver.com'+ title.get('href'))
+            letter += title.get_text() + '\n'
+            link += 'http://cafe.naver.com'+ title.get('href')+'\n\n'
+            
+                       
+time.sleep(1)
+
+
+#해당 제목 및 본문 크롤링
+#해결해야하는 점!!!!!!!!!! 앞 link의 출력결과가 2개 이상일 경우, 안됨ㅠㅠㅠㅠ
+
+driver.get(link)
+iframe = driver.find_element_by_name('cafe_main')
+driver.switch_to_frame(iframe)
+
+webpage_source = driver.page_source
+soup = BeautifulSoup(webpage_source, 'html.parser')
+
+for tag in soup.select('#tbody'):
+    article_body = tag.find_all('p')
+    for body in article_body:
+        print(letter, body.get_text())
+   
