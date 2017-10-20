@@ -3,7 +3,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 
-#크롬웹드라이버 다운로드 위치 지정
+#크롬웹드라이버 다운로드 위치
 driver = webdriver.Chrome(#'/Users/THE_ZOMBIES/Downloads/chromedriver')
 #driver = webdriver.PhantomJS('/Users/THE_ZOMBIES/Downloads/phantomjs-2.1.1-macosx/bin/phantomjs')
 
