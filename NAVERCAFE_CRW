@@ -1,0 +1,79 @@
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+import requests
+
+
+
+crawling_page_number = 500
+
+
+driver = webdriver.Chrome('/Users/THE_ZOMBIES/Downloads/chromedriver')
+#driver = webdriver.PhantomJS('/Users/THE_ZOMBIES/Downloads/phantomjs-2.1.1-macosx/bin/phantomjs')
+
+driver.implicitly_wait(3)
+driver.get('https://www.naver.com')
+
+driver.get('https://nid.naver.com/nidlogin.login')
+
+#네이버 ID & PW
+driver.find_element_by_name('id').send_keys('네이버아이디')
+driver.find_element_by_name('pw').send_keys('네이버비밀번호')
+
+#클릭!
+driver.find_element_by_xpath('//*[@id="frmNIDLogin"]/fieldset/input').click()
+
+driver.get('http://cafe.naver.com/ArticleList.nhn?search.clubid=10258021&search.menuid=163&search.boardtype=L')
+
+iframe = driver.find_element_by_name('cafe_main')
+driver.switch_to_frame(iframe)
+
+webpage_source = driver.page_source
+
+soup = BeautifulSoup(webpage_source, 'html.parser')
+posts = soup.find_all('span', class_='aaa')
+
+
+
+board_url = '''http://cafe.naver.com/ArticleList.nhn?search.clubid=10258021&search.menuid=163&search.boardtype=L&search.questionTab=A&search.totalCount=151&search.page=
+'''
+letter =[]
+link = []
+
+for i in range(1,crawling_page_number):
+    url = board_url + str(i)
+    driver.get(url)
+    
+    iframe = driver.find_element_by_name('cafe_main')
+    driver.switch_to_frame(iframe)
+    webpage_source = driver.page_source
+    soup = BeautifulSoup(webpage_source, 'html.parser')
+    posts = soup.find_all('span', class_='aaa')
+
+    main_url = 'http://cafe.naver.com'
+
+    for post in posts:
+        title = post.find('a')
+        if '사료' in title.get_text():
+           letter.append(title.get_text())
+           a = title.get('href')
+           link.append(main_url + a)
+            
+            
+time.sleep(1)
+
+bodytext = []
+
+for i in link:
+   driver.get(i)
+   iframe = driver.find_element_by_name('cafe_main')
+   driver.switch_to_frame(iframe)
+
+   webpage_source = driver.page_source
+   soup = BeautifulSoup(webpage_source, 'html.parser')
+
+   for item in soup.find_all('div',id='tbody'):
+        bodytext.append(item.get_text())
+
+for i in range(len(link)):
+   print("제목: ", letter[i], " 본문: ", bodytext[i])
